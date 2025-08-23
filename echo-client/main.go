@@ -2,11 +2,12 @@ package main
 
 import (
 	"flag"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"grpc-learn/echo"
 	"grpc-learn/echo-client/client"
 	"log"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
