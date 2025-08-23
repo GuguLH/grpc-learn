@@ -3,16 +3,23 @@ package main
 import (
 	"flag"
 	"fmt"
-	"google.golang.org/grpc"
 	"grpc-learn/echo"
 	"grpc-learn/echo-server/server"
 	"log"
 	"net"
+
+	"google.golang.org/grpc"
 )
 
 var (
 	port = flag.Int("port", 50051, "")
 )
+
+func getOptions() (opts []grpc.ServerOption) {
+	opts = make([]grpc.ServerOption, 0)
+	opts = append(opts, server.GetMTlsOpt())
+	return opts
+}
 
 func main() {
 	flag.Parse()
@@ -20,7 +27,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	s := grpc.NewServer()
+	s := grpc.NewServer(getOptions()...)
 	echo.RegisterEchoServer(s, &server.EchoServer{})
 	log.Printf("server listening at: %v\n", lis.Addr())
 	if err := s.Serve(lis); err != nil {

@@ -7,16 +7,21 @@ import (
 	"log"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
 	addr = flag.String("addr", "localhost:50051", "")
 )
 
+func getOptions() (opts []grpc.DialOption) {
+	opts = make([]grpc.DialOption, 0)
+	opts = append(opts, client.GetMTlsOpt())
+	return opts
+}
+
 func main() {
 	flag.Parse()
-	conn, err := grpc.NewClient(*addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(*addr, getOptions()...)
 	if err != nil {
 		log.Fatal(err)
 	}
