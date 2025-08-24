@@ -16,6 +16,9 @@ var (
 func getOptions() (opts []grpc.DialOption) {
 	opts = make([]grpc.DialOption, 0)
 	opts = append(opts, client.GetMTlsOpt())
+	opts = append(opts, grpc.WithUnaryInterceptor(client.UnaryInterceptor))
+	opts = append(opts, grpc.WithStreamInterceptor(client.StreamInterceptor))
+	//opts = append(opts, client.GetAuth(client.FetchToken()))
 	return opts
 }
 
@@ -27,8 +30,8 @@ func main() {
 	}
 	defer conn.Close()
 	c := echo.NewEchoClient(conn)
-	//client.CallUnary(c)
+	client.CallUnary(c)
 	//client.CallServerStream(c)
 	//client.CallClientStream(c)
-	client.CallDoubleStream(c)
+	//client.CallDoubleStream(c)
 }

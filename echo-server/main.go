@@ -18,6 +18,10 @@ var (
 func getOptions() (opts []grpc.ServerOption) {
 	opts = make([]grpc.ServerOption, 0)
 	opts = append(opts, server.GetMTlsOpt())
+
+	opts = append(opts, grpc.UnaryInterceptor(server.UnaryInterceptor))
+	opts = append(opts, grpc.StreamInterceptor(server.StreamInterceptor))
+
 	return opts
 }
 
