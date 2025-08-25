@@ -21,6 +21,7 @@ func getOptions() (opts []grpc.ServerOption) {
 
 	opts = append(opts, grpc.UnaryInterceptor(server.UnaryInterceptor))
 	opts = append(opts, grpc.StreamInterceptor(server.StreamInterceptor))
+	opts = append(opts, server.GetKeepAliveOpt()...)
 
 	return opts
 }

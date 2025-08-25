@@ -18,7 +18,8 @@ func getOptions() (opts []grpc.DialOption) {
 	opts = append(opts, client.GetMTlsOpt())
 	opts = append(opts, grpc.WithUnaryInterceptor(client.UnaryInterceptor))
 	opts = append(opts, grpc.WithStreamInterceptor(client.StreamInterceptor))
-	//opts = append(opts, client.GetAuth(client.FetchToken()))
+	opts = append(opts, client.GetAuth(client.FetchToken()))
+	opts = append(opts, client.GetKeepAliveOpt()...)
 	return opts
 }
 
