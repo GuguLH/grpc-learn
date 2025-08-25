@@ -20,6 +20,7 @@ func getOptions() (opts []grpc.DialOption) {
 	opts = append(opts, grpc.WithStreamInterceptor(client.StreamInterceptor))
 	opts = append(opts, client.GetAuth(client.FetchToken()))
 	opts = append(opts, client.GetKeepAliveOpt()...)
+	opts = append(opts, grpc.WithResolvers())
 	return opts
 }
 
