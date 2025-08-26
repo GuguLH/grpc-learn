@@ -3,6 +3,7 @@ package client
 import (
 	"log"
 
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
 )
 
@@ -11,7 +12,11 @@ const (
 	MyServiceName = "myecho"
 )
 
-var addrs = []string{"localhost:50051", "localhost:50052", "localhost:50053"}
+var addrs = []string{"localhost:50052", "localhost:50053", "localhost:50051"}
+
+func GetNameResolver() grpc.DialOption {
+	return grpc.WithResolvers(&MyResolverBuilder{})
+}
 
 type MyResolverBuilder struct {
 }
@@ -22,10 +27,11 @@ func (*MyResolverBuilder) Build(target resolver.Target, cc resolver.ClientConn, 
 		cc:         cc,
 		addrsStore: map[string][]string{MyServiceName: addrs},
 	}
+	r.start()
 	return r, nil
 }
 
-func (r *MyResolver) Start() {
+func (r *MyResolver) start() {
 	log.Println("Resolver starting...")
 	addrStrs := r.addrsStore[r.target.Endpoint()]
 	addrs := make([]resolver.Address, len(addrStrs))
@@ -46,7 +52,11 @@ type MyResolver struct {
 }
 
 func (r *MyResolver) ResolveNow(o resolver.ResolveNowOptions) {
-
+	log.Println("Resolver Now")
+	log.Println(r.cc)
+	r.addrsStore = map[string][]string{MyServiceName: []string{"localhost:50053", "localhost:50051"}}
+	r.start()
+	log.Println(r.cc)
 }
 
 func (r *MyResolver) Close() {}
