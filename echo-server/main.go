@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"grpc-learn/echo"
 	"grpc-learn/echo-server/server"
 	"log"
 	"net"
+	"os"
+	"os/signal"
 
 	"google.golang.org/grpc"
 )
@@ -35,7 +38,25 @@ func main() {
 	s := grpc.NewServer(getOptions()...)
 	echo.RegisterEchoServer(s, &server.EchoServer{})
 	log.Printf("server listening at: %v\n", lis.Addr())
-	if err := s.Serve(lis); err != nil {
-		log.Fatal(err)
-	}
+	go func() {
+		if err := s.Serve(lis); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	// 向nameServer注册服务信息,并保活
+	nameServer := server.NewNameServer("localhost:60051")
+	serviceName := "myecho"
+	addr := fmt.Sprintf("localhost:%d", *port)
+	go func() {
+		nameServer.RegisterName(serviceName, addr)
+		nameServer.Keepalive(serviceName, addr)
+	}()
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
+	defer stop()
+	<-ctx.Done()
+	// 停止服务,删除注册信息
+	nameServer.Delete(serviceName, addr)
+	nameServer.Close()
 }

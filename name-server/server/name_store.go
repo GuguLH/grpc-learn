@@ -29,6 +29,10 @@ func init() {
 	go serviceNameData.clearData()
 }
 
+func GetAllData() *nameStore {
+	return serviceNameData
+}
+
 // Register 将服务名与地址注册到集合
 func Register(serviceName, address string) {
 	ns := serviceNameData

@@ -3,9 +3,8 @@ package server
 import (
 	"context"
 	"grpc-learn/name"
-
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"io"
+	"log"
 )
 
 type NameServer struct {
@@ -13,14 +12,48 @@ type NameServer struct {
 }
 
 func (NameServer) Register(ctx context.Context, in *name.NameRequest) (*name.NameResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+	for _, address := range in.Address {
+		Register(in.ServiceName, address)
+	}
+	log.Println(GetByServiceName(in.ServiceName))
+	return &name.NameResponse{
+		ServiceName: in.ServiceName,
+	}, nil
 }
+
 func (NameServer) Delete(ctx context.Context, in *name.NameRequest) (*name.NameResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+	for _, address := range in.Address {
+		Delete(in.ServiceName, address)
+	}
+	log.Println(GetByServiceName(in.ServiceName))
+	return &name.NameResponse{
+		ServiceName: in.ServiceName,
+	}, nil
 }
+
 func (NameServer) Keepalive(stream name.Name_KeepaliveServer) error {
-	return status.Errorf(codes.Unimplemented, "method Keepalive not implemented")
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		log.Println(req)
+		for _, address := range req.Address {
+			Keepalive(req.ServiceName, address)
+		}
+	}
+
+	return stream.SendAndClose(&name.NameResponse{})
 }
+
 func (NameServer) GetAddress(ctx context.Context, in *name.NameRequest) (*name.NameResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAddress not implemented")
+	address := GetByServiceName(in.ServiceName)
+	log.Println(address)
+	return &name.NameResponse{
+		ServiceName: in.ServiceName,
+		Address:     address,
+	}, nil
 }
