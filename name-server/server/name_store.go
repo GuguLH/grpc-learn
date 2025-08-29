@@ -122,7 +122,7 @@ func GetByServiceName(serviceName string) []string {
 		if addr.expireAt <= time.Now().Unix() {
 			continue
 		}
-		list = append(list, addr.serviceName)
+		list = append(list, addr.addr)
 	}
 
 	return list
