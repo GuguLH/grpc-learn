@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"grpc-learn/echo"
 	"grpc-learn/echo-client/client"
+	client_pool "grpc-learn/echo-client/client-pool"
 	"log"
 	"time"
 
@@ -27,11 +28,15 @@ func main() {
 	// 根据地址访问
 	// conn, err := grpc.NewClient(*addr, getOptions()...)
 	// 根据 协议 + 服务名 通过名称解析器,访问服务器
-	conn, err := grpc.NewClient(fmt.Sprintf("%s:///%s", client.MyScheme, client.MyServiceName), getOptions()...)
+	// conn, err := grpc.NewClient(fmt.Sprintf("%s:///%s", client.MyScheme, client.MyServiceName), getOptions()...)
+
+	pool, err := client_pool.GetPool(fmt.Sprintf("%s:///%s", client.MyScheme, client.MyServiceName), getOptions()...)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer conn.Close()
+	conn := pool.Get()
+	defer pool.Put(conn)
+
 	c := echo.NewEchoClient(conn)
 	client.CallUnary(c)
 	time.Sleep(5 * time.Second)
