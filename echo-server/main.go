@@ -4,6 +4,8 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"grpc-learn/echo"
 	"grpc-learn/echo-server/server"
 	"log"
@@ -37,6 +39,10 @@ func main() {
 	}
 	s := grpc.NewServer(getOptions()...)
 	echo.RegisterEchoServer(s, &server.EchoServer{})
+
+	// 多路复用方式注册健康检查服务器
+	grpc_health_v1.RegisterHealthServer(s, health.NewServer())
+
 	log.Printf("server listening at: %v\n", lis.Addr())
 	go func() {
 		if err := s.Serve(lis); err != nil {
